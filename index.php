@@ -20,28 +20,33 @@
         </nav>
 
         <?php
+        
         require_once 'code.php';
 
         $text_data = '';
         $file_exported = '';
         $keywords = '';
         $keymain = '';
-        $maxresult = 50;
+        $maxresult = 5;
         $minview = 0;
         $mincomment = 0;
         $minlike = 0;
         $publish_at = '01-01-2001';
         $error_text = '';
         $check_input = true;
-
+        
+        $input_keyword = '';
+        $input_keymain = '';
+        
         if (isset($_POST) && !empty($_POST)) {
-            $input = $_POST['search_keywords'];
+            $input_keyword = $_POST['search_keywords'];
 
-            if (!empty($input) || $input != '') {
-                $keywords = explode("\n", str_replace("\r", "", $input));
+            if (!empty($input_keyword) || $input_keyword != '') {
+                $keywords = explode("\n", str_replace("\r", "", $input_keyword));
                 $keywords = array_map('trim', $keywords);
             }
-            $keymain = $_POST['keyword'];
+            $input_keymain = $_POST['keyword'];
+            $keymain = $input_keymain;
             
             if (isset($_POST['maxresult']) && $_POST['maxresult']) {
                 $maxresult = $_POST['maxresult'];
@@ -85,12 +90,7 @@
                     
                 }
                 
-//                echo "<pre>";
-//                print_r($final_result);
-//                echo "<pre>";
-//                exit;
-                
-                $file_exported = 'exported.csv';
+                $file_exported = 'youtube_exported.csv';
                 $fp = fopen($file_exported, 'w');
                 foreach ($final_result as $keyword_result) {
                     fputcsv($fp, array($keyword_result['keyword']));
@@ -125,7 +125,7 @@
 
 <?php if ($file_exported) { ?>
                                             <label style="margin-left: 10px;">Result:</label>
-                                            <a href='exported.csv'><b>Download</b></a>
+                                            <a href='youtube_exported.csv'><b>Download Here</b></a>
 <?php } ?>
                                     </div>
                                     <div class="col-md-4">
@@ -133,39 +133,38 @@
                                     <div class="col-md-8">
                                         <div class="form-group">
                                             <label>Keyword</label>
-                                            <input class="form-control" id="keyword" name="keyword" value="notail">
+                                            <input class="form-control" id="keyword" name="keyword" value="<?php $input_keymain ?>">
                                         </div>
                                         <div class="form-group">
                                             <label>Enter search keywords (keyword per line):</label>
-                                            <textarea data-autoresize class="form-control" rows="10" id="search_keywords" name="search_keywords" style="resize:vertical;"><?php echo $text_data ?>dota2 highlight
-Ti8 highlight</textarea>
+                                            <textarea data-autoresize class="form-control" rows="10" id="search_keywords" name="search_keywords" style="resize:vertical;"><?php echo $input_keyword ?></textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <div class="form-group">
                                                 <label>Max Results</label>
-                                                <input class="form-control" name="maxresult" type="number" min="1" value="5">
+                                                <input class="form-control" name="maxresult" type="number" min="1" value="<?php echo $maxresult ?>">
                                             </div>
                                             <div class="form-group">
                                                 <label>Min Views</label>
-                                                <input class="form-control" name="minview" type="number" min="0" value="0">
+                                                <input class="form-control" name="minview" type="number" min="0" value="<?php echo $minview ?>">
                                                 <p class="help-block">Enter 0 to remove filter.</p>
                                             </div>
                                             <div class="form-group">
                                                 <label>Min Comments</label>
-                                                <input class="form-control" name="mincomment" type="number" min="0" value="0">
+                                                <input class="form-control" name="mincomment" type="number" min="0" value="<?php echo $mincomment ?>">
                                                 <p class="help-block">Enter 0 to remove filter.</p>
                                             </div>
                                             <div class="form-group">
                                                 <label>Min Likes</label>
-                                                <input class="form-control" name="minlike" type="number" min="0" value="0">
+                                                <input class="form-control" name="minlike" type="number" min="0" value="<?php echo $minlike ?>">
                                                 <p class="help-block">Enter 0 to remove filter.</p>
                                             </div>
                                             <div class="form-group">
                                                 <label>Publish At Before</label>
-                                                <div class="input-append date" id="datepicker" data-date="01-01-2001" data-date-format="dd-mm-yyyy">
-                                                    <input class="span2 form-control" name="published_at" size="16" type="text" value="01-01-2001">
+                                                <div class="input-append date" id="datepicker" data-date="<?php echo $publish_at ?>" data-date-format="dd-mm-yyyy">
+                                                    <input class="span2 form-control" name="published_at" size="16" type="text" value="<?php echo $publish_at ?>">
                                                     <span class="add-on"><i class="icon-th"></i></span>
                                                 </div>
                                                 <p class="help-block">Keep default value to remove filter.</p>
