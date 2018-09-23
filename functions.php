@@ -3,16 +3,6 @@
 include_once 'config.php';
 require_once('google-api/vendor/autoload.php');
 
-function videosListMultipleIds($service, $part, $params) {
-    $params = array_filter($params);
-    $response = $service->videos->listVideos(
-        $part,
-        $params
-    );
-    
-    return $response;
-}
-
 function get_commentThreads($service, $video_id, $keymain) {
 //    $url = "https://www.googleapis.com/youtube/v3/commentThreads?key=" . DEVELOPER_KEY . "&textFormat=plainText&part=snippet%2Creplies&videoId=$video_id&maxResults=50";
     
@@ -29,11 +19,11 @@ function get_commentThreads($service, $video_id, $keymain) {
     while ($continue) {
         if ($pageToken) {
 //            $data_single = get_paged($url, $pageToken);
-            $params = array('videoId' => $video_id, 'pageToken' => $pageToken, 'searchTerms' => $keymain_text);
+            $params = array('videoId' => $video_id, 'pageToken' => $pageToken, 'maxResults' => 100, 'searchTerms' => $keymain_text);
             $data_single = commentThreadsListByVideoId($service, 'snippet,replies', $params);
         } else {
 //            $data_single = make_call($url);
-            $params = array('videoId' => $video_id, 'searchTerms' => $keymain_text);
+            $params = array('videoId' => $video_id, 'maxResults' => 100, 'searchTerms' => $keymain_text);
             $data_single = commentThreadsListByVideoId($service, 'snippet,replies', $params);
         }
         
@@ -89,11 +79,6 @@ function get_commentThreads($service, $video_id, $keymain) {
         }
     }
     
-//    echo "<pre>";
-//    print_r($result);
-//    echo "<pre>";
-//    exit;
-    
     return $result;
 }
 
@@ -104,5 +89,15 @@ function commentThreadsListByVideoId($service, $part, $params) {
         $params
     );
 
+    return $response;
+}
+
+function videosListMultipleIds($service, $part, $params) {
+    $params = array_filter($params);
+    $response = $service->videos->listVideos(
+        $part,
+        $params
+    );
+    
     return $response;
 }
