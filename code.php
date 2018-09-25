@@ -4,11 +4,14 @@ include_once 'config.php';
 require_once('google-api/vendor/autoload.php');
 require_once('functions.php');
 
-function get_result($keyword, $keymain, $maxResults = 50, $minview = 0, $minlike = 0, $mincomment = 0, $published_at = '01-01-2001') {
+function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview = 0, $minlike = 0, $mincomment = 0, $published_at = '01-01-2001') {
     
     $client = new Google_Client();
     $client->setDeveloperKey(DEVELOPER_KEY);
     $youtube = new Google_Service_YouTube($client);
+    
+    $return = array();
+    $list_id = array();
     
     try {
         $list_video = array();
@@ -47,7 +50,12 @@ function get_result($keyword, $keymain, $maxResults = 50, $minview = 0, $minlike
                         $check_date = true;
                     }
                     
-                    if ($check_date) {
+                    $check_id = true;
+                    if (!empty($video_ids) && in_array($searchResult['id']['videoId'], $video_ids)) {
+                        $check_id = false;
+                    }
+                    
+                    if ($check_date && $check_id) {
                         $list_video[$searchResult['id']['videoId']] = array(
                             'id' => $searchResult['id']['videoId'],
                             'title' => $searchResult['snippet']['title'],
@@ -73,7 +81,8 @@ function get_result($keyword, $keymain, $maxResults = 50, $minview = 0, $minlike
             }
             
         }
-            
+        
+        $return['video_ids'] = $list_id;
         $list_id_string = implode(',', $list_id);
 
         $videos_data_temp = videosListMultipleIds($youtube, 'statistics', array('id' => $list_id_string));
@@ -91,32 +100,57 @@ function get_result($keyword, $keymain, $maxResults = 50, $minview = 0, $minlike
         foreach ($list_video as $key => $video) {
             if ($minlike > 0 && $video['like'] < $minlike) {
                 unset($list_video[$key]);
-                continue;
-            }
-            if ($minview > 0 && $video['view'] < $minview) {
+            } elseif ($minview > 0 && $video['view'] < $minview) {
                 unset($list_video[$key]);
-                continue;
-            }
-            if ($mincomment > 0 && $video['comment'] < $mincomment) {
+            } elseif ($mincomment > 0 && $video['comment'] < $mincomment) {
                 unset($list_video[$key]);
-                continue;
             }
         }
+        
+        usort($list_video, 'sortByView');
         
         $result = array();
         foreach ($list_id as $video_id) {
             $temp = get_commentThreads($youtube, $video_id, $keymain);
+            $result[$video_id] = $temp;
             if (!empty($temp)) {
-                $result[$video_id] = $temp;
+                foreach ($temp as $comment_id) {
+                    $comment_link = "https://www.youtube.com/watch?v=$video_id&lc=$comment_id";
+                    echo "<tr>
+                        <td>$comment_link</td>
+                    </tr>";
+                    flush();
+                }
             }
         }
         
-        return $result;
+        echo "<tr>
+                <td><b>Video Matched filters nhưng không có comment chứa nội dung</b></td>
+          </tr>";
+        
+        foreach ($result as $video_id => $data) {
+            if (empty($data)) {
+                $video_link = "https://www.youtube.com/watch?v=$video_id";
+                echo "<tr>
+                    <td>$video_link</td>
+                </tr>";
+            }
+        }
+        flush();
+        
+        $return['result'] = $result;
+        return $return;
         
     } catch (Google_Service_Exception $e) {
-        echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
+//        return array();
+//        echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
     } catch (Google_Exception $e) {
-        echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
+//        return array();
+//        echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
     }
+}
+
+function sortByView($a, $b) {
+    return $b['view'] - $a['view'];
 }
 ?>

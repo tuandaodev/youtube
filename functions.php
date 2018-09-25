@@ -4,7 +4,6 @@ include_once 'config.php';
 require_once('google-api/vendor/autoload.php');
 
 function get_commentThreads($service, $video_id, $keymain) {
-//    $url = "https://www.googleapis.com/youtube/v3/commentThreads?key=" . DEVELOPER_KEY . "&textFormat=plainText&part=snippet%2Creplies&videoId=$video_id&maxResults=50";
     
     $continue = true;
     $result = array();
@@ -27,8 +26,10 @@ function get_commentThreads($service, $video_id, $keymain) {
             $data_single = commentThreadsListByVideoId($service, 'snippet,replies', $params);
         }
         
+        if (isset($data_single['error'])) {
+            $continue = false;
+        }
         if (isset($data_single['items'])) {
-            
             foreach ($data_single['items'] as $comments) {
                 if (isset($comments['snippet']['topLevelComment']['snippet']['textOriginal'])) {
                     $comment_text = $comments['snippet']['topLevelComment']['snippet']['textOriginal'];

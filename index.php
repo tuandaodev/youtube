@@ -34,16 +34,25 @@
         $publish_at = '01-01-2001';
         $error_text = '';
         $check_input = true;
+        $is_post = false;
         
         $input_keyword = '';
         $input_keymain = '';
         
         if (isset($_POST) && !empty($_POST)) {
+            
+            $is_post = true;
+            
             $input_keyword = $_POST['search_keywords'];
 
             if (!empty($input_keyword) || $input_keyword != '') {
                 $keywords = explode("\n", str_replace("\r", "", $input_keyword));
                 $keywords = array_map('trim', $keywords);
+                foreach ($keywords as $key => $value) {
+                    if (empty($value)) {
+                        unset($keywords[$key]);
+                    }
+                }
             }
             $input_keymain = $_POST['keyword'];
             $keymain = $input_keymain;
@@ -64,10 +73,7 @@
                 $publish_at = $_POST['published_at'];
             }
             
-//            echo "<pre>";
-//            print_r($_POST);
-//            echo "<pre>";
-//            exit;
+            $file_exported = 'youtube_exported.csv';
             
             if (!$keywords) {
                 $check_input = false;
@@ -79,35 +85,122 @@
                     $error_text .= '<br/>';
                 $error_text .= "Keyword are empty!";
             }
-
-            if ($check_input) {
-                $final_result = array();
-                foreach ($keywords as $keyword) {
-                    $temp_result['keyword'] = $keyword;
-                    $temp_result['result'] = get_result($keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at);
-
-                    $final_result[] = $temp_result;
-                    
-                }
-                
-                $file_exported = 'youtube_exported.csv';
-                $fp = fopen($file_exported, 'w');
-                foreach ($final_result as $keyword_result) {
-                    fputcsv($fp, array($keyword_result['keyword']));
-                    foreach ($keyword_result['result'] as $video_id => $comment_list) {
-                        foreach ($comment_list as $comment_id) {
-                            $comment_link = "https://www.youtube.com/watch?v=$video_id&lc=$comment_id";
-                            $temp = array($comment_link);
-                            fputcsv($fp, $temp);
-                        }
-                    }
-                }
-                fclose($fp);
-            }
         }
         ?>
 
         <div id="page-wrapper">
+            <?php if ($is_post) { ?>
+            <div class="row">
+                <div class="col-lg-12" style="margin-top: 20px;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Thông tin đang xử lý...
+                        </div>
+                        <div class="panel-body">
+                                    <div class="col-md-12"> 
+                                        <div class="form-group">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                <tbody>
+                                                    <?php
+                                                    if ($check_input) {
+                                                        $final_result = array();
+                                                        $video_ids = array();
+                                                        
+                                                        foreach ($keywords as $keyword) {
+                                                            echo "<tr>
+                                                                        <td>Keyword đang xử lý: <b>$keyword</b></td>
+                                                                  </tr>";
+                                                            flush();
+                                                            
+                                                            $temp_result['keyword'] = $keyword;
+                                                            $temp_get_result = get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at);
+                                                            
+//                                                            echo "<pre>";
+//                                                            print_r($temp_get_result);
+//                                                            echo "<pre>";
+                                                            
+                                                            $temp_result['result'] = $temp_get_result['result'];
+                                                            $video_ids = array_merge((array)$video_ids, (array)$temp_get_result['video_ids']);
+                                                            
+//                                                            echo "<pre>";
+//                                                            print_r($video_ids);
+//                                                            echo "<pre>";
+                                                            
+                                                            $final_result[] = $temp_result;
+                                                        }
+                                                        
+//                                                        echo "<pre>";
+//                                                        print_r($final_result);
+//                                                        echo "<pre>";
+//                                                        exit;
+                                                        
+                                                        $fp = fopen($file_exported, 'w');
+                                                        
+                                                        fputcsv($fp, array("Keyword","Comment Link","Video without links"));
+                                                        
+                                                        foreach ($final_result as $keyword_result) {
+                                                            $output = array();
+                                                            $output[0][0] = $keyword_result['keyword'];
+                                                            $count = -1;
+//                                                            fputcsv($fp, array("Keyword: " . $keyword_result['keyword']));
+                                                            if (count($keyword_result['result']) > 0) {
+                                                                foreach ($keyword_result['result'] as $video_id => $comment_list) {
+                                                                    if (!empty($comment_list)) {
+                                                                        foreach ($comment_list as $comment_id) {
+                                                                            $count++;
+                                                                            $comment_link = "https://www.youtube.com/watch?v=$video_id&lc=$comment_id";
+                                                                            if (!isset($output[$count][0])) {
+                                                                                $output[$count][0] = ' ';
+                                                                            }
+                                                                            $output[$count][1] = $comment_link;
+                                                                            if (!isset($output[$count][2])) {
+                                                                                $output[$count][2] = ' ';
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+    //                                                            fputcsv($fp, array("Matched Filter nhung khong co comment chua tu khoa"));
+                                                                $count_empty = -1;
+                                                                foreach ($keyword_result['result'] as $video_id => $comment_list) {
+                                                                    if (empty($comment_list)) {
+                                                                        $count_empty++;
+                                                                        $video_link = "https://www.youtube.com/watch?v=$video_id";
+                                                                        if (!isset($output[$count_empty][0])) {
+                                                                                $output[$count_empty][0] = ' ';
+                                                                        }
+                                                                        if (!isset($output[$count_empty][1])) {
+                                                                            $output[$count_empty][1] = ' ';
+                                                                        }
+                                                                        $output[$count_empty][2] = $video_link;
+                                                                    }
+                                                                }
+                                                            }
+                                                            
+//                                                            echo "<pre>";
+//                                                            print_r($output);
+//                                                            echo "<pre>";
+                                                            
+                                                            foreach ($output as $key => $value) {
+                                                                fputcsv($fp, $value);
+                                                            }
+                                                            
+                                                        }
+                                                        
+//                                                        exit;
+                                                        
+                                                        fclose($fp);
+                                                    }
+                                                    ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        </div>
+                        </div>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
             <div class="row">
                 <div class="col-lg-12" style="margin-top: 20px;">
                     <div class="panel panel-default">
@@ -133,7 +226,7 @@
                                     <div class="col-md-8">
                                         <div class="form-group">
                                             <label>Keyword</label>
-                                            <input class="form-control" id="keyword" name="keyword" value="<?php $input_keymain ?>">
+                                            <input class="form-control" id="keyword" name="keyword" value="<?php echo $input_keymain ?>">
                                         </div>
                                         <div class="form-group">
                                             <label>Enter search keywords (keyword per line):</label>
