@@ -18,12 +18,12 @@ function get_commentThreads($service, $video_id, $keymain) {
     while ($continue) {
         if ($pageToken) {
 //            $data_single = get_paged($url, $pageToken);
-            $params = array('videoId' => $video_id, 'pageToken' => $pageToken, 'maxResults' => 100, 'searchTerms' => $keymain_text);
-            $data_single = commentThreadsListByVideoId($service, 'snippet,replies', $params);
+            $params = array('videoId' => $video_id, 'pageToken' => $pageToken, 'maxResults' => 100, 'order' => 'relevance', 'searchTerms' => $keymain_text);
+            $data_single = commentThreadsListByVideoId($service, 'snippet', $params);
         } else {
 //            $data_single = make_call($url);
-            $params = array('videoId' => $video_id, 'maxResults' => 100, 'searchTerms' => $keymain_text);
-            $data_single = commentThreadsListByVideoId($service, 'snippet,replies', $params);
+            $params = array('videoId' => $video_id, 'maxResults' => 100, 'order' => 'relevance', 'searchTerms' => $keymain_text);
+            $data_single = commentThreadsListByVideoId($service, 'snippet', $params);
         }
         
         if (isset($data_single['error'])) {
@@ -50,23 +50,23 @@ function get_commentThreads($service, $video_id, $keymain) {
                     }
                     
                 }
-                if (isset($comments['replies']['comments']) && count($comments['replies']['comments'] > 0)) {
-                    foreach ($comments['replies']['comments'] as $reply) {
-                        $reply_text = $reply['snippet']['textOriginal'];
-                        $reply_text = strtolower($reply_text);
-                        if (is_array($keymain)) {
-                            foreach ($keymain as $key) {
-                                if (strpos($reply_text, $key) !== false) {
-                                    $result[] = $reply['id'];
-                                }
-                            }
-                        } else {
-                            if (strpos($reply_text, $keymain) !== false) {
-                                $result[] = $reply['id'];
-                            }
-                        }
-                    }
-                }
+//                if (isset($comments['replies']['comments']) && count($comments['replies']['comments'] > 0)) {
+//                    foreach ($comments['replies']['comments'] as $reply) {
+//                        $reply_text = $reply['snippet']['textOriginal'];
+//                        $reply_text = strtolower($reply_text);
+//                        if (is_array($keymain)) {
+//                            foreach ($keymain as $key) {
+//                                if (strpos($reply_text, $key) !== false) {
+//                                    $result[] = $reply['id'];
+//                                }
+//                            }
+//                        } else {
+//                            if (strpos($reply_text, $keymain) !== false) {
+//                                $result[] = $reply['id'];
+//                            }
+//                        }
+//                    }
+//                }
             }
         } else {
             $continue = false;
