@@ -330,11 +330,11 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Link cần tìm:</label>
-                                            <textarea data-autoresize class="form-control" rows="10" id="input_link_can_tim" name="input_link_can_tim" style="resize:vertical;"><?php if (isset($input_link_can_tim) && !empty($input_link_can_tim)) echo implode("\r\n", $input_link_can_tim) ?></textarea>
+                                            <textarea data-autoresize class="form-control" rows="5" id="input_link_can_tim" name="input_link_can_tim" style="resize:vertical;"><?php if (isset($input_link_can_tim) && !empty($input_link_can_tim)) echo implode("\r\n", $input_link_can_tim) ?></textarea>
                                         </div>
                                         <div class="form-group hidden">
                                             <label>List crawler:</label>
-                                            <textarea data-autoresize class="form-control" rows="10" id="input_list_crawler" name="input_list_crawler" style="resize:vertical;"><?php if (isset($result_comments) && !empty($result_comments)) echo implode("\r\n", $result_comments) ?></textarea>
+                                            <textarea class="form-control" id="input_list_crawler" name="input_list_crawler" style="resize:vertical;"><?php if (isset($result_comments) && !empty($result_comments)) echo implode("\r\n", $result_comments) ?></textarea>
                                         </div>
                                         <?php if (isset($_POST['action']) && $_POST['action'] == 'find_links') { ?>
                                             <div class="form-group">
@@ -388,6 +388,7 @@
 
             $(document).ready(function () {
                 $('#search_keywords').keyup();
+                $('#input_link_can_tim').keyup();
 
                 $('#datepicker').datepicker();
             });
