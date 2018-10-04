@@ -39,7 +39,7 @@
         $input_keyword = '';
         $input_keymain = '';
         
-        if (isset($_POST) && !empty($_POST)) {
+        if (isset($_POST['action']) && ($_POST['action'] == 'crawler')) {
             
             $is_post = true;
             
@@ -138,6 +138,7 @@
                                                         
                                                         fputcsv($fp, array("Keyword","Comment Link","Video without links"));
                                                         
+                                                        $result_comments = array();
                                                         foreach ($final_result as $keyword_result) {
                                                             $output = array();
                                                             $output[0][0] = $keyword_result['keyword'];
@@ -149,6 +150,7 @@
                                                                         foreach ($comment_list as $comment_id) {
                                                                             $count++;
                                                                             $comment_link = "https://www.youtube.com/watch?v=$video_id&lc=$comment_id";
+                                                                            $result_comments[] = $comment_link;
                                                                             if (!isset($output[$count][0])) {
                                                                                 $output[$count][0] = ' ';
                                                                             }
@@ -213,6 +215,7 @@
                             <div class="row show-grid">
                                 <form method="POST">
                                     <div class="col-md-8" style="margin-bottom: 20px">
+                                        <input type="hidden" name="action" value="crawler"/>
                                         <button type="submit" class="btn btn-success" value="submit">Submit</button>
                                         <button type="reset" class="btn btn-default">Reset</button>
 
@@ -270,6 +273,93 @@
                     </div>
                 </div>
             </div>
+            <?php if (isset($_POST['action']) && !empty($_POST['action'])) { 
+                
+                if (isset($_POST['action']) && $_POST['action'] == 'find_links') {
+                    
+                    $input_format_tra_ket_qua = @$_POST['input_format_tra_ket_qua'];
+                    
+                    $input_list_crawler = explode("\n", str_replace("\r", "", $_POST['input_list_crawler']));
+                    $input_list_crawler = array_map('trim', $input_list_crawler);
+                    foreach ($input_list_crawler as $key => $value) {
+                        if (empty($value)) {
+                            unset($input_list_crawler[$key]);
+                        }
+                    }
+                    $result_comments = $input_list_crawler;
+                    
+                    $input_link_can_tim = explode("\n", str_replace("\r", "", $_POST['input_link_can_tim']));
+                    $input_link_can_tim = array_map('trim', $input_link_can_tim);
+                    foreach ($input_link_can_tim as $key => $value) {
+                        if (empty($value)) {
+                            unset($input_link_can_tim[$key]);
+                        }
+                    }
+                    
+                    $count_pos = 0;
+                    $result_pos = array();
+                    foreach ($input_link_can_tim as $link) {
+                        $count_pos++;
+                        if (!in_array($link, $input_list_crawler)) {
+                            $result_pos[] = $count_pos;
+                        }
+                    }
+                    
+                }
+                
+                ?>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Checking Links
+                        </div>
+                        <div class="panel-body">
+                            <div class="row show-grid">
+                                <form method="POST">
+                                    <div class="col-md-8" style="margin-bottom: 20px">
+                                        <input type="hidden" name="action" value="find_links"/>
+                                        <button type="submit" class="btn btn-success" value="submit">Submit</button>
+                                        <button type="reset" class="btn btn-default">Reset</button>
+                                    </div>
+                                    <div class="col-md-4">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Link trong format trả kết quả</label>
+                                            <input class="form-control" id="input_format_tra_ket_qua" name="input_format_tra_ket_qua" value="<?php echo @$input_format_tra_ket_qua ?>">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Link cần tìm:</label>
+                                            <textarea data-autoresize class="form-control" rows="10" id="input_link_can_tim" name="input_link_can_tim" style="resize:vertical;"><?php if (isset($input_link_can_tim) && !empty($input_link_can_tim)) echo implode("\r\n", $input_link_can_tim) ?></textarea>
+                                        </div>
+                                        <div class="form-group hidden">
+                                            <label>List crawler:</label>
+                                            <textarea data-autoresize class="form-control" rows="10" id="input_list_crawler" name="input_list_crawler" style="resize:vertical;"><?php if (isset($result_comments) && !empty($result_comments)) echo implode("\r\n", $result_comments) ?></textarea>
+                                        </div>
+                                        <?php if (isset($_POST['action']) && $_POST['action'] == 'find_links') { ?>
+                                            <div class="form-group">
+                                                <label>Checking Links Result:</label>
+                                                <span style="display: block; color: green; font-weight: bold;">
+                                                    <?php 
+                                                        if (isset($result_pos) && !empty($result_pos)) {
+                                                            echo "No comment on link " . implode(", ", $result_pos) . "<br/>";
+                                                        }
+                                                        echo "Open the page again to get " . count(@$result_pos) . " new videos <br/>";
+                                                        echo @$_POST['input_format_tra_ket_qua'];
+                                                    ?>
+                                                </span>
+                                            </div>
+                                        <?php } ?>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <?php } ?>
+            
             <footer class="page-footer font-small teal pt-4">
                 <div class="footer-copyright py-3" style='text-align: right'>© 2018 Developer by
                     <a href='skype:live:tuandao.dev?chat'> Tuan Dao</a>
