@@ -315,7 +315,7 @@
                         </div>
                         <div class="panel-body">
                             <div class="row show-grid">
-                                <form method="POST">
+                                <form method="POST" id="find_links_form">
                                     <div class="col-md-8" style="margin-bottom: 20px">
                                         <input type="hidden" name="action" value="find_links"/>
                                         <button type="submit" class="btn btn-success" value="submit">Submit</button>
@@ -336,20 +336,21 @@
                                             <label>List crawler:</label>
                                             <textarea class="form-control" id="input_list_crawler" name="input_list_crawler" style="resize:vertical;"><?php if (isset($result_comments) && !empty($result_comments)) echo implode("\r\n", $result_comments) ?></textarea>
                                         </div>
-                                        <?php if (isset($_POST['action']) && $_POST['action'] == 'find_links') { ?>
-                                            <div class="form-group">
-                                                <label>Checking Links Result:</label>
-                                                <span style="display: block; color: green; font-weight: bold;">
-                                                    <?php 
-                                                        if (isset($result_pos) && !empty($result_pos)) {
-                                                            echo "No comment on link " . implode(", ", $result_pos) . "<br/>";
-                                                        }
-                                                        echo "Open the page again to get " . count(@$result_pos) . " new videos <br/>";
-                                                        echo @$_POST['input_format_tra_ket_qua'];
-                                                    ?>
-                                                </span>
-                                            </div>
-                                        <?php } ?>
+                                        <div class="form-group" id="find_links_result">
+                                            <?php if (isset($_POST['action']) && $_POST['action'] == 'find_links') { ?>
+
+                                                    <label>Checking Links Result:</label>
+                                                    <span style="display: block; color: green; font-weight: bold;">
+                                                        <?php 
+                                                            if (isset($result_pos) && !empty($result_pos)) {
+                                                                echo "No comment on link " . implode(", ", $result_pos) . "<br/>";
+                                                            }
+                                                            echo "Open the page again to get " . count(@$result_pos) . " new videos <br/>";
+                                                            echo @$_POST['input_format_tra_ket_qua'];
+                                                        ?>
+                                                    </span>
+                                            <?php } ?>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -391,6 +392,28 @@
                 $('#input_link_can_tim').keyup();
 
                 $('#datepicker').datepicker();
+                
+                $("#find_links_form").submit(function(event){
+                    event.preventDefault();
+                    var values = $(this).serialize();
+                    $.ajax({
+                        url: "action.php",
+                        type: "post",
+                        data: values,
+                        dataType: 'json',
+                        success: function (response) {
+                            console.log(response);
+                            console.log(response.status);
+                            console.log(response.html);
+                            if (response.status === "1") {
+                                $("#find_links_result").html(response.html);
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                           console.log(textStatus, errorThrown);
+                        } 
+                    });
+                });
             });
         </script>
     </body>
