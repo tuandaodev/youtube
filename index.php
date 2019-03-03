@@ -118,6 +118,7 @@
 //                                                            echo "<pre>";
 //                                                            print_r($temp_get_result);
 //                                                            echo "<pre>";
+//                                                            exit;
                                                             
                                                             $temp_result['result'] = $temp_get_result['result'];
                                                             $video_ids = array_merge((array)$video_ids, (array)$temp_get_result['video_ids']);

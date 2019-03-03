@@ -32,7 +32,18 @@ function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview =
             } else {
                 $params = array( 'q' => $keyword, 'maxResults' => 50);
             }
+            
+//            echo "<pre>";
+//            print_r($params);
+//            echo "</pre>";
+//            exit;
+            
             $searchResponse = $youtube->search->listSearch('id,snippet', $params);
+            
+//            echo "<pre>";
+//            print_r($searchResponse);
+//            echo "</pre>";
+//            exit;
             
             foreach ($searchResponse['items'] as $searchResult) {
                 if ($searchResult['id']['kind'] == 'youtube#video') {
@@ -109,6 +120,11 @@ function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview =
         
         usort($list_video, 'sortByView');
         
+//        echo "<pre>";
+//        print_r($list_video);
+//        echo "</pre>";
+//        exit;
+        
         $result = array();
         foreach ($list_id as $video_id) {
             $temp = get_commentThreads($youtube, $video_id, $keymain);
@@ -124,19 +140,19 @@ function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview =
             }
         }
         
-        echo "<tr>
-                <td><b>Video Matched filters nhưng không có comment chứa nội dung</b></td>
-          </tr>";
-        
-        foreach ($result as $video_id => $data) {
-            if (empty($data)) {
-                $video_link = "https://www.youtube.com/watch?v=$video_id";
-                echo "<tr>
-                    <td>$video_link</td>
-                </tr>";
-            }
-        }
-        flush();
+//        echo "<tr>
+//                <td><b>Video Matched filters nhưng không có comment chứa nội dung</b></td>
+//          </tr>";
+//        
+//        foreach ($result as $video_id => $data) {
+//            if (empty($data)) {
+//                $video_link = "https://www.youtube.com/watch?v=$video_id";
+//                echo "<tr>
+//                    <td>$video_link</td>
+//                </tr>";
+//            }
+//        }
+//        flush();
         
         $return['result'] = $result;
         return $return;
