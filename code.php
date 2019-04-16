@@ -4,10 +4,11 @@ include_once 'config.php';
 require_once('google-api/vendor/autoload.php');
 require_once('functions.php');
 
-function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview = 0, $minlike = 0, $mincomment = 0, $published_at = '01-01-2001') {
+function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview = 0, $minlike = 0, $mincomment = 0, $published_at = '01-01-2001') {
     
     $client = new Google_Client();
-    $client->setDeveloperKey(DEVELOPER_KEY);
+    $split = explode(",", DEVELOPER_KEY);
+    $client->setDeveloperKey($split[array_rand($split)]);
     $youtube = new Google_Service_YouTube($client);
     
     $return = array();
@@ -127,8 +128,10 @@ function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview =
         
         $result = array();
         foreach ($list_id as $video_id) {
+            if (in_array($video_id, $video_ids)) continue;
             $temp = get_commentThreads($youtube, $video_id, $keymain);
             $result[$video_id] = $temp;
+            $video_ids[] = $video_id;
             if (!empty($temp)) {
                 foreach ($temp as $comment_id) {
                     $comment_link = "https://www.youtube.com/watch?v=$video_id&lc=$comment_id";
@@ -158,11 +161,13 @@ function get_result($video_ids, $keyword, $keymain, $maxResults = 50, $minview =
         return $return;
         
     } catch (Google_Service_Exception $e) {
-//        return array();
-//        echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
+        if (isset($_REQUEST['test']) && !empty($_REQUEST['test'])) {
+            echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
+        }
     } catch (Google_Exception $e) {
-//        return array();
-//        echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
+        if (isset($_REQUEST['test']) && !empty($_REQUEST['test'])) {
+            echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
+        }
     }
 }
 

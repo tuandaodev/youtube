@@ -107,9 +107,9 @@
                                                         $video_ids = array();
                                                         
                                                         foreach ($keywords as $keyword) {
-                                                            echo "<tr>
-                                                                        <td>Keyword đang xử lý: <b>$keyword</b></td>
-                                                                  </tr>";
+//                                                            echo "<tr>
+//                                                                        <td>Keyword đang xử lý: <b>$keyword</b></td>
+//                                                                  </tr>";
                                                             flush();
                                                             
                                                             $temp_result['keyword'] = $keyword;
@@ -121,15 +121,20 @@
 //                                                            exit;
                                                             
                                                             $temp_result['result'] = $temp_get_result['result'];
-                                                            $video_ids = array_merge((array)$video_ids, (array)$temp_get_result['video_ids']);
+                                                            //$video_ids = array_merge((array)$video_ids, (array)$temp_get_result['video_ids']);
                                                             
 //                                                            echo "<pre>";
 //                                                            print_r($video_ids);
 //                                                            echo "<pre>";
                                                             
+                                                            
                                                             $final_result[] = $temp_result;
                                                         }
                                                         
+//                                                        echo "<pre>";
+//                                                        print_r($video_ids);
+//                                                        echo "</pre>";
+//                                                        
 //                                                        echo "<pre>";
 //                                                        print_r($final_result);
 //                                                        echo "<pre>";
