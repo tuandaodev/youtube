@@ -4,11 +4,16 @@ include_once 'config.php';
 require_once('google-api/vendor/autoload.php');
 require_once('functions.php');
 
-function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview = 0, $minlike = 0, $mincomment = 0, $published_at = '01-01-2001') {
+function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview = 0, $minlike = 0, $mincomment = 0, $published_at = '01-01-2001', &$DEV_KEY_INDEX) {
     
     $client = new Google_Client();
     $split = explode(",", DEVELOPER_KEY);
-    $client->setDeveloperKey($split[array_rand($split)]);
+    if (count($split) < $DEV_KEY_INDEX) {
+        echo "TẤT CẢ CÁC DEVELOP KEY ĐỀU BỊ LỖI. VUI LÒNG CHỜ RESET.";
+        flush();
+        exit;
+    }
+    $client->setDeveloperKey($split[$DEV_KEY_INDEX]);
     $youtube = new Google_Service_YouTube($client);
     
     $return = array();
@@ -161,13 +166,26 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
         return $return;
         
     } catch (Google_Service_Exception $e) {
+        if (strpos($e->getMessage(), "dailyLimitExceeded")) {
+            echo "KEY " . @$split[$DEV_KEY_INDEX] . " đã hết lượt sử dụng. Chuyển sang key kế tiếp.";
+            $DEV_KEY_INDEX = $DEV_KEY_INDEX + 1;
+        }
+        
         if (isset($_REQUEST['test']) && !empty($_REQUEST['test'])) {
             echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
         }
+        flush();
+        return false;
     } catch (Google_Exception $e) {
+        if (strpos($e->getMessage(), "dailyLimitExceeded")) {
+            echo "KEY " . @$split[$DEV_KEY_INDEX] . " đã hết lượt sử dụng. Chuyển sang key kế tiếp.";
+            $DEV_KEY_INDEX = $DEV_KEY_INDEX + 1;
+        }
         if (isset($_REQUEST['test']) && !empty($_REQUEST['test'])) {
             echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
         }
+        flush();
+        return false;
     }
 }
 

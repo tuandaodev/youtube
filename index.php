@@ -105,6 +105,7 @@
                                                     if ($check_input) {
                                                         $final_result = array();
                                                         $video_ids = array();
+                                                        $DEV_KEY_INDEX = 0;
                                                         
                                                         foreach ($keywords as $keyword) {
 //                                                            echo "<tr>
@@ -113,7 +114,11 @@
                                                             flush();
                                                             
                                                             $temp_result['keyword'] = $keyword;
-                                                            $temp_get_result = get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at);
+                                                            
+                                                            $temp_get_result = get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at, $DEV_KEY_INDEX);
+                                                            if (!$temp_get_result) {
+                                                                get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at, $DEV_KEY_INDEX);
+                                                            }
                                                             
 //                                                            echo "<pre>";
 //                                                            print_r($temp_get_result);
