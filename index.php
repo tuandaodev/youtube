@@ -116,9 +116,17 @@
                                                             $temp_result['keyword'] = $keyword;
                                                             
                                                             $temp_get_result = get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at, $DEV_KEY_INDEX);
+                                                            
+                                                            echo "<pre>";
+                                                            print_r($temp_get_result);
+                                                            echo "</pre>";
+                                                            exit;
+                                                            
                                                             if (!$temp_get_result) {
-                                                                get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at, $DEV_KEY_INDEX);
+                                                                $temp_get_result = get_result($video_ids, $keyword, $keymain, $maxresult, $minview, $minlike, $mincomment, $publish_at, $DEV_KEY_INDEX);
                                                             }
+                                                            
+                                                            
                                                             
 //                                                            echo "<pre>";
 //                                                            print_r($temp_get_result);

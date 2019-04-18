@@ -13,6 +13,7 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
         flush();
         exit;
     }
+    
     $client->setDeveloperKey($split[$DEV_KEY_INDEX]);
     $youtube = new Google_Service_YouTube($client);
     
@@ -171,20 +172,18 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
             $DEV_KEY_INDEX = $DEV_KEY_INDEX + 1;
         }
         
-        if (isset($_REQUEST['test']) && !empty($_REQUEST['test'])) {
+        if ((isset($_REQUEST['test']) && !empty($_REQUEST['test'])) || DEBUG) {
             echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
         }
-        flush();
         return false;
     } catch (Google_Exception $e) {
         if (strpos($e->getMessage(), "dailyLimitExceeded")) {
             echo "KEY " . @$split[$DEV_KEY_INDEX] . " đã hết lượt sử dụng. Chuyển sang key kế tiếp.";
             $DEV_KEY_INDEX = $DEV_KEY_INDEX + 1;
         }
-        if (isset($_REQUEST['test']) && !empty($_REQUEST['test'])) {
+        if ((isset($_REQUEST['test']) && !empty($_REQUEST['test'])) || DEBUG) {
             echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
         }
-        flush();
         return false;
     }
 }
