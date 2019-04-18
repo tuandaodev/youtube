@@ -18,14 +18,14 @@ function get_commentThreads($service, $video_id, $keymain) {
     while ($continue) {
         if ($pageToken) {
 //            $data_single = get_paged($url, $pageToken);
-            $params = array('videoId' => $video_id, 'pageToken' => $pageToken, 'maxResults' => 100, 'order' => 'relevance',
-//                'searchTerms' => $keymain_text
+            $params = array('videoId' => $video_id, 'pageToken' => $pageToken, 'maxResults' => 50, 'order' => 'relevance',
+                'searchTerms' => $keymain_text
                     );
             $data_single = commentThreadsListByVideoId($service, 'snippet', $params);
         } else {
 //            $data_single = make_call($url);
-            $params = array('videoId' => $video_id, 'maxResults' => 100, 'order' => 'relevance', 
-//                'searchTerms' => $keymain_text
+            $params = array('videoId' => $video_id, 'maxResults' => 50, 'order' => 'relevance', 
+                'searchTerms' => $keymain_text
                     );
             $data_single = commentThreadsListByVideoId($service, 'snippet', $params);
         }

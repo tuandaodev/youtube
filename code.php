@@ -47,11 +47,6 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
             
             $searchResponse = $youtube->search->listSearch('id,snippet', $params);
             
-//            echo "<pre>";
-//            print_r($searchResponse);
-//            echo "</pre>";
-//            exit;
-            
             foreach ($searchResponse['items'] as $searchResult) {
                 if ($searchResult['id']['kind'] == 'youtube#video') {
                     $count_item++;
@@ -124,21 +119,23 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
                 unset($list_video[$key]);
             }
         }
-        
-        usort($list_video, 'sortByView');
-        
+        try {
+            usort($list_video, 'sortByView');
+        } catch (Exception $ex) {
+
+        }
 //        echo "<pre>";
 //        print_r($list_video);
 //        echo "</pre>";
 //        exit;
-        
+       
         $result = array();
         foreach ($list_id as $video_id) {
             if (in_array($video_id, $video_ids)) continue;
             $temp = get_commentThreads($youtube, $video_id, $keymain);
             $result[$video_id] = $temp;
-            $video_ids[] = $video_id;
             if (!empty($temp)) {
+                $video_ids[] = $video_id;
                 foreach ($temp as $comment_id) {
                     $comment_link = "https://www.youtube.com/watch?v=$video_id&lc=$comment_id";
                     echo "<tr>
@@ -164,6 +161,12 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
 //        flush();
         
         $return['result'] = $result;
+        
+//        echo "<pre>";
+//        print_r($return);
+//        echo "</pre>";
+//        exit;
+        
         return $return;
         
     } catch (Google_Service_Exception $e) {
@@ -175,7 +178,12 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
         if ((isset($_REQUEST['test']) && !empty($_REQUEST['test'])) || DEBUG) {
             echo sprintf('<p>A service error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
         }
-        return false;
+        
+        if (strpos($e->getMessage(), "commentsDisabled")) {
+            return true;
+        } else {
+            return false;
+        }
     } catch (Google_Exception $e) {
         if (strpos($e->getMessage(), "dailyLimitExceeded")) {
             echo "KEY " . @$split[$DEV_KEY_INDEX] . " đã hết lượt sử dụng. Chuyển sang key kế tiếp.";
@@ -184,11 +192,15 @@ function get_result(&$video_ids, $keyword, $keymain, $maxResults = 50, $minview 
         if ((isset($_REQUEST['test']) && !empty($_REQUEST['test'])) || DEBUG) {
             echo sprintf('<p>An client error occurred: <code>%s</code></p>', htmlspecialchars($e->getMessage()));
         }
-        return false;
+        if (strpos($e->getMessage(), "commentsDisabled")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
 function sortByView($a, $b) {
-    return $b['view'] - $a['view'];
+    return @$b['view'] - @$a['view'];
 }
 ?>
